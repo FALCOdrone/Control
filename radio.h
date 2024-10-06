@@ -1,7 +1,7 @@
 #ifndef RADIO_H
 #define RADIO_H
 
-#include "pinDef.h"
+#include "common/pinDef.h"
 
 #if defined USE_SBUS_RX
 #include "SBUS.h"  //Bolder Flight SBUS v1.0.1

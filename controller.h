@@ -1,7 +1,7 @@
 #ifndef CTRL_H
 #define CTRL_H
 
-#include "types.h"
+#include "common/types.h"
 #include <Arduino.h>
 
 class Controller {
