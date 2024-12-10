@@ -227,8 +227,9 @@ void Controller::gravityFeedforward_equilibriumThrust(vec_t desPos, PIDpos_t *PI
         PID->d.z = (PID->p.z - PID->pPrev.z) / dt;
         PID->out.z = 0.01 * (Kp_pos_z * PID->p.z + Kd_pos_z * PID->d.z);  // PD controller for z-axis position
     } else {
-        PID->out.z = takeoffGain - (g * vehicleMass);
+        PID->out.z = -takeoffGain*(g * vehicleMass);
     }
+    PID->out.z = PID->out.z - g * vehicleMass; 
 
     // Update z variables
     PID->pPrev.z = PID->p.z;
