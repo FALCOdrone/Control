@@ -1,0 +1,17 @@
+EXPORTS
+    get_D_last_addr_eHuVLZV73eYAHom5JojrZF @1
+    get_F_B_addr_eHuVLZV73eYAHom5JojrZF @2
+    get_I_last_addr_eHuVLZV73eYAHom5JojrZF @3
+    get_M_addr_eHuVLZV73eYAHom5JojrZF @4
+    get_checksum_source_info @5
+    get_dll_checksum_eHuVLZV73eYAHom5JojrZF @6
+    get_dt_addr_eHuVLZV73eYAHom5JojrZF @7
+    get_err_vel_last_addr_eHuVLZV73eYAHom5JojrZF @8
+    get_omega_fb_addr_eHuVLZV73eYAHom5JojrZF @9
+    get_pos_err_addr_eHuVLZV73eYAHom5JojrZF @10
+    get_q_d_addr_eHuVLZV73eYAHom5JojrZF @11
+    get_q_fb_addr_eHuVLZV73eYAHom5JojrZF @12
+    get_thrust_addr_eHuVLZV73eYAHom5JojrZF @13
+    get_vel_fb_addr_eHuVLZV73eYAHom5JojrZF @14
+    get_vel_fb_last_addr_eHuVLZV73eYAHom5JojrZF @15
+    loop_eHuVLZV73eYAHom5JojrZF @16

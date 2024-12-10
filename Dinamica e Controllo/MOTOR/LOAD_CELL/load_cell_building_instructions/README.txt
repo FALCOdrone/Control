@@ -1,0 +1,1 @@
+Load cell frame by indrekluuk on Thingiverse: https://www.thingiverse.com/thing:4602226

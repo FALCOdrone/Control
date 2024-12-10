@@ -1,0 +1,6 @@
+CONTROLLER: Arduino code for the controller (28-09-23)
+ControllerSIMULINKinC: Drone dynamics simulator woth C-caller for testing in C (FCU) (14-10-23)
+Drone Model: Simulink File for the Drone dynamics & control (16-10-23)
+manual guidance (OLD): SImulink file for the manual guidance of the drone (in progress...) (26-06-23)
+sketch_sep11a (OLD): Arduino Controller software (28-09-23)
+Software team control code: Software team controller (18-07-23)

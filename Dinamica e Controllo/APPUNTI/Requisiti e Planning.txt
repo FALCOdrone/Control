@@ -1,0 +1,20 @@
+Hardware
+- Specifiche di controllo ESC
+- Codice di controllo motori (una funzione driveMotors(a,b,c,d) che imponga il giusto pwm a ogni motore)
+- Codice per acquisizione comandi da radio, compreso input per override controllo, definizione di variabili in output dalla radio e di funzioni di acquisizione comandi
+
+Controllo
+- Unificare e verificare le varie versioni dei file MATLAB (sono un po' un casino) per poi tenere solo le cose effettivamente utili
+- Modello MATLAB del drone (c'è già nel vecchio controllo ma è da verificare)
+- Progettazione e sviluppo di un controllo di attitude (stabilità) in MATLAB (o modellizzazione di quello già implementato) e verifica stabilità (volendo usando il simulatore che c'è già)
+- Implementazione del controllo del drone tramite radio, utilizzando solo il controllo di stabilità, imponendo attitude e potenza motori
+- Progettazione, simulazione e sviluppo di un controllo di posizione per guida autonoma, definizione delle variabili di controllo necessarie (la jetson che fa il trajectory planning si comporta come un radiocomando o in modo differente?)
+- Definizione delle misure necessarie come feedback al trajectory planning
+
+Requisiti
+- Progettazione di sistemi di controllo (PID)
+- MATLAB e Simulink
+- Programmazione Arduino
+- Sistemi di controllo per UAV e droni (potrebbe essere utile qualcuno che ha conoscenze specifiche)
+
+La cosa che ci manca di più è qualcuno che sappia effettivamente come progettare il controllo di posizione e qual è il modo migliore di implementare la comunicazione tra jetson e teensy (il trajectory planning manda coordinate da raggiungere e il resto lo fa la teensy? manda punto punto dalla home? manda direttamente i comandi come se fosse un radiocomando (e quindi il controllo di posizione è sulla teensy)?

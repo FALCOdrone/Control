@@ -1,0 +1,274 @@
+// I have opted for global variables to save the inputs and the outputs of every function,
+// since a function can only return one value and we need to work with 3D vector.
+
+// The script ..._fb stsands for feed-back, and represents the numerical values of the vectors that will 
+//be outputed from the sensors + filters and feeded back to the control algorothm;
+ #include <math.h>
+#include "controller_vel.h"
+
+
+
+
+
+// POS  CONTROLLER
+float Kp[3] = {0.25,0.25,0.5};
+
+//VELOCITY CONTROLLER
+#define KP_X 5
+#define KP_Y 5
+#define KP_Z 15
+#define KI_X 0.5
+#define KI_Y 0.5
+#define KI_Z 10
+#define KD_X 0.5
+#define KD_Y 0.5
+#define KD_Z 1
+
+const double N [3] ={3,3,3};
+
+const double KP [3] ={KP_X , KP_Y  , KP_Z }; 
+const double KI [3] ={KI_X, KI_Y , KI_Z};
+const double KD [3] ={KD_X  , KD_Y  , KD_Z };
+
+const double TI [3] = {KP_X/KI_X,KP_Y/KI_Y,KP_Z/KI_Z};
+const double TD [3] = {KD_X/KP_X,KD_Y/KP_Y,KD_Z/KP_Z};
+//
+
+double vel_des[3];
+double err_vel[3];
+double err_vel_last[3];
+double vel_fb_[3]={0,0,0}; //velocità passata di fb per azione derivativa
+
+double P[3];
+double I[3];
+double I_[3];
+double D[3];
+double D_[3];
+double acc_des[3];
+
+
+double m = 3.074 ;  // MASSA
+double g = 9.81;
+
+
+ double  F_B[3];
+ double dt;
+ double vel_fb[3];
+ double q_fb[4];
+double pos_err[3];
+double q_d[4];
+
+
+
+
+void position_controller();
+void velocity_controller();
+void feedforward_gravity_comp();
+void extract_attitude_setpoint();
+
+
+
+//void setup() {
+  // put your setup code here, to run once:
+
+//}
+
+
+void loop(void) {
+
+
+  // put your main code here, to run repeatedly:
+
+
+  // STEP 3 : position controller:
+  position_controller();
+
+  // STEP 4: velocity controller:
+  velocity_controller();
+
+  // STEP 5: feedforward gravity compensation:
+  feedforward_gravity_comp();
+
+  // STEP 6: Exctract attitude setpoint + convert forces from NED to BFR:
+  extract_attitude_setpoint();
+
+}
+
+
+double cross_product_x(double b, double c,double m,double n){
+
+  double x = b*n - c*m;
+
+  return x;
+}
+
+float cross_product_y(double a,double c,double l,double n){
+
+  double y = c*l - a*n;
+
+  return y;
+}
+
+double cross_product_z(double a,double b,double l,double m){
+
+  double z = a*m - b*l;
+
+  return z;
+}
+
+
+
+
+void position_controller(){
+
+  for(int i = 0; i < 3; i++){
+    vel_des[i] = pos_err[i] * Kp[i];
+    if(vel_des[i]>10){
+      vel_des[i]=10;
+    } else if(vel_des[i]<-10){
+      vel_des[i]=-10;
+    }
+  }
+}
+
+void velocity_controller(){
+
+
+  for(int j = 0 ; j < 3; j++){
+      P[j] = (vel_des[j] - vel_fb[j]) * KP[j];
+      //Integral:
+      err_vel[j] = (vel_des[j] - vel_fb[j]);
+      I[j] = I_[j] + (err_vel[j])*dt* KP[j]/TI[j];
+      I_[j] = I[j];
+      // Derivative:
+      D[j]= (TD[j]/(N[j]*dt+TD[j]))*D_[j]+((KP[j]*TD[j]*N[j])/(N[j]*dt+TD[j]))*(vel_fb_[j]-vel_fb[j]);
+      D_[j] = D[j];
+      acc_des[j] = P[j] + I[j] + D[j];
+      err_vel_last[j] = err_vel[j];
+      vel_fb_[j] = vel_fb[j];
+  }
+}
+
+void feedforward_gravity_comp(){
+
+  acc_des[2] = acc_des[2] - m*g;
+}
+
+void extract_attitude_setpoint(){
+
+  // Step 1: define matrix 'A' from q_fb == q0 from Simulink;
+
+  double q[4];
+
+  double norm_q_fb = sqrt(q_fb[0]*q_fb[0] + q_fb[1]*q_fb[1] + q_fb[2]*q_fb[2] + q_fb[3]*q_fb[3]);
+
+  q[1] = q_fb[0]/norm_q_fb;
+  q[2] = q_fb[1]/norm_q_fb;
+  q[3] = q_fb[2]/norm_q_fb;
+  q[4] = q_fb[3]/norm_q_fb;
+
+  double q_v[3];
+
+  q_v[0] = q[0];
+  q_v[1] = q[1];
+  q_v[2] = q[2];
+
+  double A_1_1 = q[3] - (q_v[0]*q_v[0] + q_v[1]*q_v[1] + q_v[2]*q_v[2]);
+
+  double A_row_1[3] = {A_1_1,0,0};
+  double A_row_2[3] = {0,A_1_1,0};
+  double A_row_3[3] = {0,0,A_1_1};
+
+  A_row_1[0] = A_row_1[0] + q_v[0]*q_v[0];
+  A_row_1[1] = q_v[0] * q_v[1];
+  A_row_1[2] = q_v[0] * q_v[2];
+
+  A_row_1[1] -= 2 * q[3] * (- q[2]);
+  A_row_1[2] -= 2 * q[3] * q[1];
+
+  // Step 2: define array b1, b2, b3, row vectors of matrix 'R'
+  // Note that only the first row of matrix A is needed!!!
+  // acc_des == F_I from Symulink;
+
+  double b1_d[3] = {A_row_1[0], A_row_1[1], A_row_1[2]};
+
+  double norm_acc_des = sqrt(acc_des[0]*acc_des[0] + acc_des[1]*acc_des[1]+ acc_des[2]*acc_des[2]);
+  double b3[3] = {acc_des[0]/norm_acc_des, acc_des[1]/norm_acc_des, acc_des[2]/norm_acc_des};
+  double b2_c[3];
+
+  b2_c[0] = cross_product_x(b3[1],b3[2],b1_d[1],b1_d[2]);
+  b2_c[1] = cross_product_y(b3[0],b3[2],b1_d[0],b1_d[2]);
+  b2_c[2] = cross_product_z(b3[0],b3[1],b1_d[0],b1_d[1]);
+
+  double norm_b2_c = sqrt(b2_c[0]*b2_c[0]+ b2_c[1]*b2_c[1] + b2_c[2]*b2_c[2]);
+
+  double b2[3] = {b2_c[0]/norm_b2_c, b2_c[1]/norm_b2_c, b2_c[2]/norm_b2_c};
+
+  double b1[3];
+
+  b1[0] = cross_product_x(b2[1],b2[2],b2[1],b3[2]);
+  b1[1] = cross_product_y(b2[0],b2[2],b3[0],b3[2]);
+  b1[2] = cross_product_z(b2[0],b2[1],b3[0],b3[1]);
+
+  // Step 3: define array 'vector' 
+
+  double vector[4] = {b1[0], b2[1], b3[2], b1[0]+b2[1]+b3[2]};  //NOTA CONTROLLARE CHE SIA CORRETTO--> 4 TERMINE
+
+  // Find max of 'vector' and its index
+
+  double max = vector[0];
+  int j = 0;
+
+  for(int i=1; i < 5;i++){
+    if(vector[i] > max){
+      max = vector[i];
+      j = i;
+    }
+  }
+  
+  switch (j)
+  {
+    case 0:
+    q_d[0] = 1 + b1[0] - b2[1] - b3[2];
+    q_d[1] = b1[1] + b2[0];
+    q_d[2] = b1[2] + b3[0];
+    q_d[3] = b2[2] - b3[1];
+    break;
+
+    case 1:
+    q_d[0] = b2[0] + b1[1];
+    q_d[1] = 1 + b2[1] - b3[2] - b1[0];
+    q_d[2] = b2[2] + b3[1];
+    q_d[3] = b3[0] - b1[2];
+    break;
+
+    case 2:
+    q_d[0] = b3[0] + b1[2];
+    q_d[1] = b3[1] + b2[2];
+    q_d[2] = 1 + b3[2] - b1[0] - b2[1];
+    q_d[3] = b1[1] - b2[0];
+    break;
+
+    case 3:
+    q_d[0] = b2[2] - b3[1];
+    q_d[1] = b3[0] - b1[2];
+    q_d[2] = b1[1] - b2[0];
+    q_d[3] = 1 + b1[0] + b2[1] + b3[2];
+    break;
+  }
+
+  // Last step: define desired attitude and forces in bf and save it in global variables;
+
+  double norm_q_d = sqrt(q_d[0]*q_d[0] + q_d[1]*q_d[1] + q_d[2]*q_d[2] + q_d[3]*q_d[3]);
+
+  q_d[0] = q_d[0]/norm_q_d; 
+  q_d[1] = q_d[1]/norm_q_d;
+  q_d[2] = q_d[2]/norm_q_d;
+  q_d[3] = q_d[3]/norm_q_d;
+
+  F_B[0] = b1[0] * acc_des[0] + b1[1] * acc_des[1] + b1[2] * acc_des[2];
+  F_B[1] = b2[0] * acc_des[0] + b2[1] * acc_des[1] + b2[2] * acc_des[2];
+  F_B[2] = b3[0] * acc_des[0] + b3[1] * acc_des[1] + b3[2] * acc_des[2];
+  
+}
+

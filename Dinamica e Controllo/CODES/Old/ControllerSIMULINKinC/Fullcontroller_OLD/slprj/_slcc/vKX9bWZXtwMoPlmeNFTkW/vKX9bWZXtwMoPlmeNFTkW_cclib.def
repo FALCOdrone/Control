@@ -1,0 +1,18 @@
+LIBRARY vKX9bWZXtwMoPlmeNFTkW_cclib.dll
+EXPORTS
+    get_vel_fb_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_thrust_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_q_fb_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_vel_fb_last_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_err_vel_last_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_omega_fb_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_D_last_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_pos_err_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_dt_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_I_last_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_M_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_q_d_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_F_B_addr_vKX9bWZXtwMoPlmeNFTkW
+    get_dll_checksum_vKX9bWZXtwMoPlmeNFTkW
+    loop_vKX9bWZXtwMoPlmeNFTkW
+    get_checksum_source_info

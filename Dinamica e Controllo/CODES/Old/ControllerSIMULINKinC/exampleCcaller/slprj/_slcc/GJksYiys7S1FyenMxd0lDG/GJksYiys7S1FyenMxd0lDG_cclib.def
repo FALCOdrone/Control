@@ -1,0 +1,6 @@
+EXPORTS
+    cumulativeAdder_GJksYiys7S1FyenMxd0lDG @1
+    get_checksum_source_info @2
+    get_dll_checksum_GJksYiys7S1FyenMxd0lDG @3
+    get_gVec_addr_GJksYiys7S1FyenMxd0lDG @4
+    get_sum_addr_GJksYiys7S1FyenMxd0lDG @5
