@@ -29,6 +29,11 @@ class Controller {
         float Kp_yaw = 0.3;      // Yaw P-gain
         float Ki_yaw = 0.05;     // Yaw I-gain
         float Kd_yaw = 0.00015;  // Yaw D-gain (be careful when increasing too high, motors will begin to overheat!)
+        float Kp_pos_z = 19.29;
+        float Kd_pos_z = 18.41;
+        float takeoffGain = 0.1;
+        float g = 9.81;
+        float vehicleMass = 3.76946;
 
     public:
 
@@ -36,6 +41,7 @@ class Controller {
         void controlANGLE(unsigned long throttleCmd /*channel_1_pwm */, attitude_t desiredAtt, vec_t gyro, attitude_t attIMU, PID_t *PID);
         void controlANGLE2(unsigned long throttleCmd /*channel_1_pwm */, attitude_t desiredAtt, vec_t gyro, attitude_t attIMU, attitude_t *attIMUprev, PID_t *PIDol, PID_t *PIDil);
         void controlRATE(unsigned long throttleCmd /*channel_1_pwm */, attitude_t desiredAtt, vec_t gyro, vec_t *prevGyFro, attitude_t attIMU, PID_t *PID);
+        void gravityFeedforward_equilibriumThrust(vec_t desPos, PIDpos_t *PID);
 };
 
 #endif

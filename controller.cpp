@@ -213,3 +213,24 @@ void Controller::controlRATE(unsigned long throttleCmd /*channel_1_pwm */, attit
     PID->pPrev.yaw = PID->p.yaw;
     PID->iPrev.yaw = PID->i.yaw;
 }
+
+void Controller::gravityFeedforward_equilibriumThrust(vec_t desPos, PIDpos_t *PID, vec_t pos_est, vec_t vel_est, float dt_prev) {
+    
+    float currTime = millis();
+    float dt = desPos.dt;
+    bool takeoff_flag = 1;
+
+    if (currTime >= 1000) { // at 1 second the flag takeoff_flag is set to 0, see on matlab the takeoff_flag time series
+        takeoff_flag = 0;
+
+        PID->p.z = desPos.z - pos_est.z;  // Error in z-axis
+        PID->d.z = (PID->p.z - PID->pPrev.z) / dt;
+        PID->out.z = 0.01 * (Kp_pos_z * PID->p.z + Kd_pos_z * PID->d.z);  // PD controller for z-axis position
+    } else {
+        PID->out.z = takeoffGain - (g * vehicleMass);
+    }
+
+    // Update z variables
+    PID->pPrev.z = PID->p.z;
+}
+
