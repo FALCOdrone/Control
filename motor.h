@@ -2,7 +2,7 @@
 #define MOTOR_H
 
 #include <Arduino.h>
-#include "common/pinDef.h"
+#include "common/pinDef.h" 
 
 class Motor {
 
