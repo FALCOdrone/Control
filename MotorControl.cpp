@@ -2,8 +2,6 @@
 
 float thrust[4] = {0, 0, 0, 0};
 
-
-
 void setup() {
     Serial.begin(9600);
 
@@ -16,29 +14,45 @@ void setup() {
 
 void parseCommand(String command) {
     if (command.startsWith("thrust[")) {
-        // Trova l'indice del motore
+        // Finds motor index
         int startIndex = command.indexOf('[') + 1;
         int endIndex = command.indexOf(']');
         int motorIndex = command.substring(startIndex, endIndex).toInt();
 
-        // Trova il valore del thrust
+        // Finds thrust value
         int equalIndex = command.indexOf('=');
         float value = command.substring(equalIndex + 1).toFloat();
 
-        // Aggiorna il vettore thrust
+        // Thrust vector update
         if (motorIndex >= 0 && motorIndex < 4) {
             thrust[motorIndex] = value;
         }
-    } else if (command == "start test") {
-        for (int k = 0; k <= 1; k++) {
+    }
+    if (command == "start test") {
+        for (int k = 0; k <= 10; k++) {
             thrust[0] = k * 100;
+            thrust[1] = k * 100;
+            thrust[2] = k * 100;
+            thrust[3] = k * 100;
             MOTOR_FR.driveMotors(thrust[0]);
             MOTOR_FL.driveMotors(thrust[1]);
             MOTOR_RR.driveMotors(thrust[2]);
             MOTOR_RL.driveMotors(thrust[3]);
             delay(300);
         }
-    } else if (command == "stop") {
+        for (int k = 10; k >= 0; k--) {
+            thrust[0] = k * 100;
+            thrust[1] = k * 100;
+            thrust[2] = k * 100;
+            thrust[3] = k * 100;
+            MOTOR_FR.driveMotors(thrust[0]);
+            MOTOR_FL.driveMotors(thrust[1]);
+            MOTOR_RR.driveMotors(thrust[2]);
+            MOTOR_RL.driveMotors(thrust[3]);
+            delay(300);
+        }
+    }
+    if (command == "stop") {
         MOTOR_FR.throttleCut();
         MOTOR_FL.throttleCut();
         MOTOR_RR.throttleCut();
@@ -51,7 +65,7 @@ void loop() {
         String command = Serial.readStringUntil('\n');
         parseCommand(command);
 
-        // Aggiorna i motori con il vettore thrust
+        // Updates motors with the thurst value
         MOTOR_FR.driveMotors(thrust[0]);
         MOTOR_FL.driveMotors(thrust[1]);
         MOTOR_RR.driveMotors(thrust[2]);
