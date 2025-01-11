@@ -6,7 +6,7 @@
 #include "common/pinDef.h"
 
 #define MAX_THRUST 2000
-#define ZERO_THRUST 100  // check what is the actual zero thrust for us (it was 1000 before i changed it to 100)
+#define ZERO_THRUST 1000  
 
 class Motor {
   private:
@@ -21,8 +21,15 @@ class Motor {
     // motor inizialization
     void initialize() {
         motor.attach(pin,1000,2000);
+        //motor.writeMicroseconds(ZERO_THRUST);
+        //motor.writeMicroseconds(MAX_THRUST);
         motor.write(0);
         delay(1000);
+        //motor.write(6);
+        //delay(800);
+        //motor.write(8);
+        //delay(1000);
+        //motor.write(6);
     }
 
     // Motors drive function
@@ -31,7 +38,7 @@ class Motor {
         motor.writeMicroseconds(pulseWidth);
     }
 
-    void throttleCut() {  //it doesnt work for some reason
+    void throttleCut() {
         //motor.writeMicroseconds(map(ZERO_THRUST, 0, 3560, 1000, 2000));
         motor.writeMicroseconds(ZERO_THRUST);
     }

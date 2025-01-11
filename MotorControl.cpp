@@ -27,6 +27,11 @@ void parseCommand(String command) {
         if (motorIndex >= 0 && motorIndex < 4) {
             thrust[motorIndex] = value;
         }
+        // Updates motors with the thurst value
+        MOTOR_FR.driveMotors(thrust[0]);
+        MOTOR_FL.driveMotors(thrust[1]);
+        MOTOR_RR.driveMotors(thrust[2]);
+        MOTOR_RL.driveMotors(thrust[3]);
     }
     if (command == "start test") {
         for (int k = 0; k <= 10; k++) {
@@ -52,7 +57,7 @@ void parseCommand(String command) {
             delay(300);
         }
     }
-    if (command == "stop") {
+    if (command == "s") {  // s to stop the motors
         MOTOR_FR.throttleCut();
         MOTOR_FL.throttleCut();
         MOTOR_RR.throttleCut();
@@ -64,11 +69,5 @@ void loop() {
     if (Serial.available() > 0) {
         String command = Serial.readStringUntil('\n');
         parseCommand(command);
-
-        // Updates motors with the thurst value
-        MOTOR_FR.driveMotors(thrust[0]);
-        MOTOR_FL.driveMotors(thrust[1]);
-        MOTOR_RR.driveMotors(thrust[2]);
-        MOTOR_RL.driveMotors(thrust[3]);
     }
 }
