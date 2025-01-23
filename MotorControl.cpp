@@ -43,7 +43,7 @@ void parseCommand(String command) {
             MOTOR_FL.driveMotors(thrust[1]);
             MOTOR_RR.driveMotors(thrust[2]);
             MOTOR_RL.driveMotors(thrust[3]);
-            delay(300);
+            delay(500);
         }
         for (int k = 10; k >= 0; k--) {
             thrust[0] = k * 100;
@@ -54,7 +54,7 @@ void parseCommand(String command) {
             MOTOR_FL.driveMotors(thrust[1]);
             MOTOR_RR.driveMotors(thrust[2]);
             MOTOR_RL.driveMotors(thrust[3]);
-            delay(300);
+            delay(500);
         }
     }
     if (command == "s") {  // s to stop the motors
