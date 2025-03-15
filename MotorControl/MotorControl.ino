@@ -1,6 +1,7 @@
-#include <Motor.h>
+#include "motor.h"
 
 float thrust[4] = {0, 0, 0, 0};
+
 
 void setup() {
     Serial.begin(9600);
