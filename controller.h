@@ -29,8 +29,8 @@ class Controller {
     public:
 
         Controller(float thrust[4]);
-        void gravityFeedforward_equilibriumThrust(vec_t desPos, PIDpos_t *PID, vec_t pos_est, vec_t vel_est, float dt_prev);
-        void attitudePID(attitude_t ref_attitude, attitude_t est_attitude, PIDattitude_t *PID, float throttleCmd);
+        void gravityFeedforward_equilibriumThrust(vec_t desPos, PID_altitude *PID, vec_t pos_est, vec_t vel_est, float dt_prev);
+        void attitudePID(attitude_t ref_attitude, attitude_t est_attitude, PID_attitude *PID, float throttleCmd);
 };
 
 #endif

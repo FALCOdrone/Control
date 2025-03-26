@@ -1,16 +1,17 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
-#include <Arduino.h>
-#include <ESP32Servo.h>
-#include "common/pinDef.h"
+//#include <Arduino.h>
+#include <PWMServo.h>
+//#include "common/pinDef.h"
+#include "pinDef.h"
 
 #define MAX_THRUST 2000
 #define ZERO_THRUST 1000  
 
 class Motor {
   private:
-    Servo motor; // Servo object to control the motor
+    PWMServo motor; // Servo object to control the motor
     int pin;     // Motor pin
 
   public:
@@ -35,12 +36,14 @@ class Motor {
     // Motors drive function
     void driveMotors(float value) {
         int pulseWidth = map(value, 0, 3560, 1000, 2000); //----------- mettere al posto di , 3560
-        motor.writeMicroseconds(pulseWidth);
+        //motor.writeMicroseconds(pulseWidth);
+        motor.write(pulseWidth);
     }
 
     void throttleCut() {
         //motor.writeMicroseconds(map(ZERO_THRUST, 0, 3560, 1000, 2000));
-        motor.writeMicroseconds(ZERO_THRUST);
+        //motor.writeMicroseconds(ZERO_THRUST);
+        motor.write(pulseWidth);
     }
 };
 
