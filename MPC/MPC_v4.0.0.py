@@ -122,6 +122,7 @@ I_y = +0.4815                 # moment of inertia about y (pitch)
 I_z = +0.5778                    # moment of inertia about z (yaw)
 l_arm = 0.13 # Arm length for force allocation (distance from center to each propeller). [m]
 bf = 0.0001
+drag_coef = 0.005  # Drag Coefficent of propellers
 inertiaMatrix, _ = sim.getShapeInertia(droneHandle)
 print(inertiaMatrix)
 
@@ -159,8 +160,8 @@ B_d = B * dt
 
 # Define cost matrices.
 Q = np.diag([0.5, 0.5, 3.0,    # x, y, z
-             0.05, 0.05, 0.1,  # vx, vy, vz
-             0.75, 0.75, 0.1,  # roll, pitch, yaw
+             0.1, 0.1, 0.1,  # vx, vy, vz
+             0.75, 0.75, 0.0,  # roll, pitch, yaw
              0.0, 0.0, 0.0])   # p, q, r
 
 R = np.diag([0.1, 0.05, 0.05, 0.1])
@@ -171,6 +172,8 @@ u_max = np.array([1.0, 1.15, 1.15, 1.0])
 
 # Create an instance of the PID controller for altitude correction.
 pid_z = PIDController(kp=kp_z, ki=ki_z, kd=kd_z, dt=dt)
+pid_x = PIDController(kp=0.0, ki=0.1, kd=0.0, dt=dt)
+pid_y = PIDController(kp=0.0, ki=0.1, kd=0.0, dt=dt)
 
 
 # Save simulation parameters.
@@ -188,7 +191,7 @@ while (t := sim.getSimulationTime()) < simualtion_time:
     linVel, _ = sim.getObjectVelocity(droneHandle)  # [vx, vy, vz]
     ori = sim.getObjectOrientation(droneHandle, -1)  # [roll, pitch, yaw]
     _, angVel = sim.getObjectVelocity(droneHandle)   # Angular velocities.
-    
+    target_lin_vel, _ = sim.getObjectVelocity(targetHandle)
     # Construct the state vector.
     x0 = np.array([
         pos[0], pos[1], pos[2],
@@ -214,10 +217,10 @@ while (t := sim.getSimulationTime()) < simualtion_time:
         else:
         
             targetObjPos = [
-                4*np.exp(-0.05*t) * np.sin(0.9*t),  # Sine wave movement for x
-                4*np.exp(-0.05*t) * np.cos(0.9*t),  # Sine wave movement for y
-                1.0+0.1*t             # Fixed altitude (z)
-            ]
+            4*np.exp(-0.05*t) * np.sin(0.9*t),  # Sine wave movement for x
+            4*np.exp(-0.05*t) * np.cos(0.9*t),  # Sine wave movement for y
+            1.0+0.1*t             # Fixed altitude (z)
+        ]
         sim.setObjectPosition(targetHandle, -1, targetObjPos)
 
     elif pattern == 1:
@@ -253,9 +256,11 @@ while (t := sim.getSimulationTime()) < simualtion_time:
     # For small angles: roll_des ≈ (1/g)*(Kp_att * error_y), pitch_des ≈ -(1/g)*(Kp_att * error_x)
     roll_des = (1/g) * (Kp_att * pos_error[1])
     pitch_des = -(1/g) * (Kp_att * pos_error[0])
-    yaw_des = 0.0  # desired yaw
+    vel_ref_x = pid_x.update(pos_error[0])
+    vel_ref_y = pid_y.update(pos_error[1])
+    yaw_des = 0.0 #np.arctan2(y_err,x_err)  # desired yaw
     ref = np.array([targetPos[0], targetPos[1], targetPos[2],
-                    0, 0, 0,
+                    vel_ref_x, vel_ref_y, target_lin_vel[2],
                     roll_des, pitch_des, yaw_des,
                     0, 0, 0])
     
@@ -311,12 +316,20 @@ while (t := sim.getSimulationTime()) < simualtion_time:
     #Add wind forces
     wind_x = random_int = np.random.randint(5, 16)
     wind_y = random_int = np.random.randint(5, 16)
-    windVector = [0,0,0]#[wind_x,wind_y,0]
+    windVector = [5,5,0]#[wind_x,wind_y,0]
     sim.addForceAndTorque(droneHandle, windVector, [0, 0, 0])
 
+
+    # Compute reaction torques for each propeller.
+    torque0 = drag_coef * f0    # for propeller 0
+    torque1 = -drag_coef * f1   # for propeller 1
+    torque2 = drag_coef * f2    # for propeller 2
+    torque3 = -drag_coef * f3   # for propeller 3
+    torque_z = [torque0, torque1, torque2, torque3]
+    
     # --- Apply Forces to Propellers ---
     for i in range(4):
-        sim.addForceAndTorque(propellerHandle[i], forces_world[i], [0, 0, 0])
+        sim.addForceAndTorque(propellerHandle[i], forces_world[i], [0, 0, torque_z[i]])
     
     #Rotate the propellers (visual effect)
     sim.setJointTargetVelocity(jointHandle[0], -100)
